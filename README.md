@@ -10,4 +10,6 @@ Simple image generator
 - git clone --recursive https://github.com/F5DXWsqPme/Image-generator-public
 - cd Image-generator-public
 - cmake CMakeLists.txt
-- make
+- mkdir build
+- cd build
+- cmake --build .
