@@ -1,0 +1,5 @@
+This project uses Vulkan (https://www.khronos.org/vulkan/) available under MIT License.
+
+This project uses Boost (https://www.boost.org/) available under Boost Software License.
+
+This project uses stb (https://github.com/nothings/stb).

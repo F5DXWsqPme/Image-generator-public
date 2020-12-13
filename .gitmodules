@@ -1,0 +1,9 @@
+[submodule "src/src/ext/volk"]
+	path = src/src/ext/volk
+	url = https://github.com/zeux/volk
+[submodule "src/ext/volk"]
+	path = src/ext/volk
+	url = https://github.com/zeux/volk
+[submodule "src/ext/stb"]
+	path = src/ext/stb
+	url = https://github.com/nothings/stb

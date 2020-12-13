@@ -1,0 +1,292 @@
+#version 450 core
+#extension GL_GOOGLE_include_directive : require
+//#extension GL_EXT_debug_printf : require
+
+#include "glsl_def.glsl"
+#include "common/material.glsl"
+#include "common/cam_data.glsl"
+#include "common/params.glsl"
+#include "common/environment.glsl"
+#include "common/triangle.glsl"
+#include "common/kd_tree_node_data.glsl"
+#include "common/light.glsl"
+
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(push_constant) uniform PUSH_CONSTANTS_STRUCTURE
+{
+  UINT Seed1;
+  UINT Seed2;
+} PushConstants;
+
+/**
+ * \brief Scene data structure.
+ */
+layout(std140, set = 0, binding = 0) uniform SHADER_ARGUMENTS
+{
+  /** Camera structure */
+  CAM_DATA Cam;
+
+  /** Render parameters */
+  RENDER_PARAMS Par;
+
+  /** Default environment */
+  ENVIRONMENT AirEnvi;
+
+  /** Image width */
+  UINT Width;
+  
+  /** Image height */
+  UINT Height;
+} Args;
+
+layout(std430, set = 0, binding = 1) buffer RANDOM_NUMBERS
+{
+  UINT Numbers[];
+} NumbersTable;
+
+/**
+ * \brief Materials table.
+ */
+layout(std140, set = 0, binding = 2) buffer MATERIALS_TABLE
+{
+  /** Materials array */
+  MATERIAL Materials[];
+} MaterialsTable;
+
+/**
+ * \brief Environments table.
+ */
+layout(std140, set = 0, binding = 3) buffer ENVIRONMENTS_TABLE
+{
+  /** Environments array */
+  ENVIRONMENT Environments[];
+} EnvironmentsTable;
+
+/**
+ * \brief Triangles table
+ */
+layout(std140, set = 0, binding = 4) buffer TRIANGLES_TABLE
+{
+  /** Triangles array */
+  TRIANGLE Triangles[];
+} TrianglesTable;
+
+/**
+ * \brief Kd-tree nodes table
+ */
+layout(std140, set = 0, binding = 5) buffer NODES_TABLE
+{
+  /** Nodes */
+  KD_TREE_NODE_DATA Nodes[];
+} Tree;
+
+/**
+ * \brief Kd-tree nodes table
+ */
+layout(std140, set = 1, binding = 0) buffer OUT_IMAGE
+{
+  /** Pixels array */
+  vec4 Pixels[];
+} OutImage;
+
+/**
+ * \brief Intersection scene with ray function
+ * \param[in] Ray Ray for intersection
+ * \param[in, out] Intr Intersection structure
+ * \return TRUE-if intersect, FALSE-if otherwise
+ */
+BOOL IntersectNodes( RAY Ray, out INTR Intr )
+{
+  UINT U = 0;
+  INT Depth = 0;
+  INT NumOfVisit = 0;
+  INTR CurIntr;
+  KD_TREE_NODE_DATA CurNode;
+  vec3 InvDir = vec3(1, 1, 1) / Ray.Dir;
+  
+  Intr.T = 3e+38;
+  BOOL IsIntr = FALSE;
+  
+  while (Depth > -1)
+  {
+    switch (NumOfVisit)
+    {
+    case 0:
+      CurNode = Tree.Nodes[U];
+  
+      if (IntersectBB(CurNode.BB, Ray.Org, InvDir, CurIntr.T) && CurIntr.T < Intr.T)
+      {
+        if (CurNode.NumOfTriangles != -1) // Leaf
+        {
+          UINT Offset = CurNode.TrianglesOffset;
+          
+          for (UINT i = 0; i < CurNode.NumOfTriangles; i++)
+          {
+            UINT TrId = Offset + i;
+  
+            if (IntersectTriangle(TrianglesTable.Triangles[TrId], TrId, Ray, Args.Par, CurIntr) &&
+                (CurIntr.T < Intr.T))
+            {
+              Intr = CurIntr;
+              IsIntr = TRUE;
+            }
+          }
+        
+          Depth--;
+          NumOfVisit = 2 - (U % 2 == 1 ? 1 : 0); // right subtree if U === 0 mod 2
+          U = (U - 1) / 2;
+        }
+        else
+        {
+          Depth++;
+          NumOfVisit = 0;
+          U = 2 * U + 1; // left subtree
+        }
+      }
+      else
+      {
+        Depth--;
+        NumOfVisit = 2 - (U % 2 == 1 ? 1 : 0); // right subtree if U === 0 mod 2
+        U = (U - 1) / 2;
+      }
+      break;
+    case 1:
+      Depth++;
+      NumOfVisit = 0;
+      U = 2 * U + 2; // right subtree
+      break;
+    case 2:
+      Depth--;
+      NumOfVisit = 2 - (U % 2 == 1 ? 1 : 0); // right subtree if U === 0 mod 2
+      U = (U - 1) / 2;
+      break;
+    }
+  }
+
+  return IsIntr;
+}
+
+/**
+ * \brief Main function in shader.
+ */
+VOID main( VOID )
+{
+  if (gl_GlobalInvocationID.x < Args.Width && gl_GlobalInvocationID.y < Args.Height)
+  {
+    const FLT PI = 3.14159265359;
+    
+    vec3 ResColor = vec3(0, 0, 0);
+    vec3 Weigth = vec3(1, 1, 1);
+    INTR Intr;
+    FLT Fog;
+    FLT Decay;
+    ENVIRONMENT Envi = Args.AirEnvi;
+    vec3 FogColor;
+    TRIANGLE Triangl;
+    RANDOM_STATE State;
+    
+    State.State = PushConstants.Seed1 + (gl_GlobalInvocationID.y * Args.Width + gl_GlobalInvocationID.x) * PushConstants.Seed2;//NumbersTable.Numbers[gl_GlobalInvocationID.y * Args.Width + gl_GlobalInvocationID.x];
+    
+    vec2 Offset = vec2(GetNextUniform(State), GetNextUniform(State));
+    RAY R = GenerateRay(Args.Cam, gl_GlobalInvocationID.x + Offset.x,
+                        gl_GlobalInvocationID.y + Offset.y);
+    
+    for (INT CounterOfRenderIterations = 0;
+         CounterOfRenderIterations < Args.Par.MaxDepthRender;
+         CounterOfRenderIterations++)
+    {
+      FogColor = Envi.FogColor.xyz;
+    
+      if (!IntersectNodes(R, Intr))
+      {
+        Fog = 0;
+        Decay = 0;
+        
+        if (Envi.AbsCoef == 0)
+          Decay = 1;
+        if (Envi.FogCoef == 0)
+          Fog = 1;
+        
+        ResColor = ResColor +
+        FogColor * Weigth * ((1 - Fog) * Decay);
+        break;
+      }
+
+      Triangl = TrianglesTable.Triangles[Intr.TriangleNumber];
+      Intr.Vert = InterpolateIntersection(Triangl, Intr);
+      Fog = exp(-Envi.FogCoef * Intr.T);
+      Decay = exp(-Envi.AbsCoef * Intr.T);
+
+      ResColor = ResColor + Weigth * FogColor * (1 - Fog) * Decay;
+      Weigth = Weigth * Fog * Decay;
+
+      vec3 V = -R.Dir;
+
+      vec3 Normal = Intr.Vert.N.xyz;
+      
+      Normal = faceforward(Normal, -V, Normal);
+  
+      FLT NV = dot(Normal, V);
+
+      MATERIAL Mtl = MaterialsTable.Materials[Triangl.MatId];
+      FLT Alpha2 = pow(Mtl.Roughness, 4);
+
+      vec3 MicroN = GetMicroNormal(Alpha2, Normal, State);
+      vec3 Refl = reflect(R.Dir, MicroN);
+      vec3 Diff = GetDiffDir(Normal, State);
+      
+      vec3 H = normalize(V + Refl);
+
+      FLT NH = dot(Normal, H);
+      FLT NL = dot(Normal, Refl);
+
+      if (NL < 0)
+      {
+        ResColor = ResColor + Mtl.Emit.xyz * Weigth;
+        break;
+      }
+      
+      vec3 F0 = mix(vec3(0.04f, 0.04f, 0.04f), Mtl.Color.xyz, Mtl.Metal);
+      
+      FLT HV = dot(H, V);
+
+      FLT G = GeometryEval(NV, Alpha2) * GeometryEval(NL, Alpha2);
+      vec3 F = FresnelSchlick(F0, HV);
+
+      vec3 ReflColor = F * (G * HV / (NV * NH));
+      vec3 DiffColor = Mtl.Color.xyz * (vec3(1, 1, 1) - F) *
+        (NL * (1 - Mtl.Metal) * dot(Normal, Diff) / PI);
+
+      FLT ReflLen = length(ReflColor);
+      FLT DiffLen = length(DiffColor);
+      FLT AllLen = ReflLen + DiffLen;
+
+      ReflLen /= AllLen;
+      DiffLen /= AllLen;
+
+      ResColor = ResColor.xyz + Mtl.Emit.xyz * Weigth;
+
+      if (GetNextUniform(State) < ReflLen)
+      {
+        R.Org = Intr.Vert.P.xyz + Refl * Args.Par.Threshold;
+        R.Dir = Refl;
+        Weigth = max(Weigth * ReflColor * (1 / ReflLen), vec3(0, 0, 0));
+      }
+      else
+      {
+        R.Org = Intr.Vert.P.xyz + Diff * Args.Par.Threshold;
+        R.Dir = Diff;
+        Weigth = max(Weigth * DiffColor * (1 / DiffLen), vec3(0, 0, 0));
+      }
+
+      vec3 WeigthCorrected = clamp(Weigth, vec3(0, 0, 0), vec3(1, 1, 1));
+
+      if (Weigth.x + Weigth.y + Weigth.z < Args.Par.ColorThreshold)
+        break;
+    }
+  
+    vec3 OldColor = OutImage.Pixels[gl_GlobalInvocationID.y * Args.Width + gl_GlobalInvocationID.x].xyz;
+    OutImage.Pixels[gl_GlobalInvocationID.y * Args.Width + gl_GlobalInvocationID.x].xyz = OldColor + ResColor;
+  }
+}
