@@ -2,7 +2,7 @@
     <device_id>0</device_id>
     <width>1920</width>
     <height>1080</height>
-    <number_of_samples>100</number_of_samples>
+    <number_of_samples>10</number_of_samples>
     <output_path>res/frame_one_seed.png</output_path>
     <output_format>png</output_format>
     <render_mode>gpu_one_seed</render_mode>
