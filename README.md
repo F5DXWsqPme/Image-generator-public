@@ -9,7 +9,7 @@ Simple image generator
 - Install git
 - git clone --recursive https://github.com/F5DXWsqPme/Image-generator-public
 - cd Image-generator-public
-- cmake CMakeLists.txt
 - mkdir build
 - cd build
+- cmake ..
 - cmake --build .
