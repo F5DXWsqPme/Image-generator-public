@@ -8,6 +8,6 @@ Simple image generator
 - Install CMake
 - Install git
 - git clone --recursive https://github.com/F5DXWsqPme/Image-generator-public
-- cd Image-generator
+- cd Image-generator-public
 - cmake CMakeLists.txt
 - make
