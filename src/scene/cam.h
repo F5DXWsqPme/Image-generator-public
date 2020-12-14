@@ -1,6 +1,8 @@
 #ifndef __cam_h_
 #define __cam_h_
 
+#include <cstddef>
+
 #include "math/ray.h"
 
 #pragma pack(push, 4)
