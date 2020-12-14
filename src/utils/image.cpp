@@ -8,11 +8,12 @@
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "ext/stb/stb_image_resize.h"
 
-#include <omp.h>
+
 
 #include "def.h"
 #include "image.h"
 #include "error.h"
+#include "utils/parallel_for.h"
 
 /**
  * \brief Clear image function
@@ -105,8 +106,10 @@ VOID image::Resize( const INT NewW, const INT NewH )
  */
 VOID image::operator+=( const image & Img )
 {
-  #pragma omp parallel for
-  for (INT y = 0; y < H; y++)
+  //#pragma omp parallel for
+  //for (INT y = 0; y < H; y++)
+  parallel_for::Run(Img.FrameH, [&]( INT y )
+  {
     for (INT x = 0; x < W; x++)
     {
       const image_vec OldPixel = GetPixel(x, y);
@@ -118,6 +121,7 @@ VOID image::operator+=( const image & Img )
   
       SetPixel(x, y, image_vec(R, G, B));
     }
+  });
 }
 
 /**
@@ -126,8 +130,10 @@ VOID image::operator+=( const image & Img )
  */
 VOID image::operator/=(const DBL N)
 {
-  #pragma omp parallel for
-  for (INT y = 0; y < H; y++)
+  //#pragma omp parallel for
+  //for (INT y = 0; y < H; y++)
+  parallel_for::Run(H, [&]( INT y )
+  {
     for (INT x = 0; x < W; x++)
     {
       const image_vec OldPixel = GetPixel(x, y);
@@ -138,6 +144,7 @@ VOID image::operator/=(const DBL N)
   
       SetPixel(x, y, image_vec(R, G, B));
     }
+  });
 }
 
 /**

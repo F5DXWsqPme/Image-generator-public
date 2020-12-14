@@ -1,6 +1,7 @@
 #include <cmath>
 
 #include "cpu_hdr.h"
+#include "utils/parallel_for.h"
 
 /**
   * \brief Tone mapping function
@@ -20,8 +21,10 @@ image_vec cpu_hdr::ToneCompression( const image_vec &Src ) const
   */
 VOID cpu_hdr::Bloom( image * Img )
 {
-  #pragma omp parallel for
-  for (INT y = 0; y < Img->FrameH; y++)
+  //#pragma omp parallel for
+  //for (INT y = 0; y < Img->FrameH; y++)
+  parallel_for::Run(Img->FrameH, [&]( INT y )
+  {
     for (INT x = 0; x < Img->FrameW; x++)
     {
       image_vec SrcColor(Img->GetPixel(x, y));
@@ -34,6 +37,7 @@ VOID cpu_hdr::Bloom( image * Img )
 
       PingPongBuffers[1].SetPixel(x, y, Color);
     }
+  });
 
   for (INT i = 0; i < NumberOfBlumIterations; i++)
   {
@@ -41,8 +45,10 @@ VOID cpu_hdr::Bloom( image * Img )
     BlurVerticalIteration(PingPongBuffers[0], &PingPongBuffers[1]);
   }
 
-  #pragma omp parallel for
-  for (INT y = 0; y < Img->FrameH; y++)
+  //#pragma omp parallel for
+  //for (INT y = 0; y < Img->FrameH; y++)
+  parallel_for::Run(Img->FrameH, [&]( INT y )
+  {
     for (INT x = 0; x < Img->FrameW; x++)
     {
       image_vec Color(Img->GetPixel(x, y));
@@ -54,6 +60,7 @@ VOID cpu_hdr::Bloom( image * Img )
 
       Img->SetPixel(x, y, Color);
     }
+  });
 }
 
 /**
@@ -63,8 +70,10 @@ VOID cpu_hdr::Bloom( image * Img )
   */
 VOID cpu_hdr::BlurVerticalIteration( const image & Src, image * Dest )
 {
-  #pragma omp parallel for
-  for (INT y = 0; y < Dest->FrameH; y++)
+  //#pragma omp parallel for
+  //for (INT y = 0; y < Dest->FrameH; y++)
+  parallel_for::Run(Dest->FrameH, [&]( INT y )
+  {
     for (INT x = 0; x < Dest->FrameW; x++)
     {
       image_vec Color(0, 0, 0);
@@ -81,6 +90,7 @@ VOID cpu_hdr::BlurVerticalIteration( const image & Src, image * Dest )
 
       Dest->SetPixel(x, y, Color);
     }
+  });
 }
 
 /**
@@ -90,8 +100,10 @@ VOID cpu_hdr::BlurVerticalIteration( const image & Src, image * Dest )
   */
 VOID cpu_hdr::BlurHorisontalIteration( const image & Src, image * Dest )
 {
-  #pragma omp parallel for
-  for (INT y = 0; y < Dest->FrameH; y++)
+  //#pragma omp parallel for
+  //for (INT y = 0; y < Dest->FrameH; y++)
+  parallel_for::Run(Dest->FrameH, [&]( INT y )
+  {
     for (INT x = 0; x < Dest->FrameW; x++)
     {
       image_vec Color(0, 0, 0);
@@ -108,6 +120,7 @@ VOID cpu_hdr::BlurHorisontalIteration( const image & Src, image * Dest )
 
       Dest->SetPixel(x, y, Color);
     }
+  });
 }
 
 /**
@@ -158,8 +171,11 @@ VOID cpu_hdr::Process( image *Img )
   Bloom(Img);
 
   // Tone mapping
-  #pragma omp parallel for
-  for (INT y = 0; y < Img->FrameH; y++)
+  //#pragma omp parallel for
+  //for (INT y = 0; y < Img->FrameH; y++)
+  parallel_for::Run(Img->FrameH, [&]( INT y )
+  {
     for (INT x = 0; x < Img->FrameW; x++)
       Img->SetPixel(x, y, ToneCompression(Img->GetPixel(x, y)));
+  });
 }

@@ -4,7 +4,7 @@
     <height>1080</height>
     <number_of_samples>30</number_of_samples>
     <output_path>res/frame_cpu.png</output_path>
-    <output_format>jpg</output_format>
+    <output_format>png</output_format>
     <render_mode>cpu</render_mode>
     <camera>
         <proj_dist>0.1</proj_dist>

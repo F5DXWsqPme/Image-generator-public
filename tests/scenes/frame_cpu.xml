@@ -1,7 +1,7 @@
 <frame>
     <device_id>0</device_id>
-    <width>1920</width>
-    <height>1080</height>
+    <width>200</width>
+    <height>100</height>
     <number_of_samples>100</number_of_samples>
     <output_path>res/frame_cpu.png</output_path>
     <output_format>png</output_format>

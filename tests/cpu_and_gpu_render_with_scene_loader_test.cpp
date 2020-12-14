@@ -38,9 +38,9 @@ BOOST_AUTO_TEST_CASE(CpuAndGpuGetEqualWithLoader)
   RndGPU.MakeFrame(&ImgGPU, Loader.Camera, Loader.Scene,
                    Loader.Width, Loader.Height, Loader.NumberOfSamples);
 
-  INT NumOfSamples = 30;
-  INT W = 500;
-  INT H = 300;
+  INT NumOfSamples = 100;
+  INT W = 200;
+  INT H = 100;
 
   render RndCPU;
   scene Scn;

@@ -7,6 +7,7 @@
 #include "cpu_render.h"
 #include "trace.h"
 #include "scene/material.h"
+#include "utils/parallel_for.h"
 
 /**
  * \brief Render initialization function
@@ -76,19 +77,20 @@ VOID cpu_render::MakeSample( image *Im )
   const environment AirEnvi = environment::Make();
   const kd_tree &Tree = Scene->GetTree();
 
-  #pragma omp parallel for
-  for (INT y = 0; y < Im->FrameH; y++)
-  {
-    tracer RayTraceStructure(Tree, AirEnvi, Gen, Scene->RenderPar);
-
-    for (INT x = 0; x < Im->FrameW; x++)
+ // #pragma omp parallel for
+  //for (INT y = 0; y < Im->FrameH; y++)
+  parallel_for::Run(Im->FrameH, [&]( INT y )
     {
-      vec TraceResult = RayTraceStructure.Trace(Camera->ToRay(x + Distr(Gen), y + Distr(Gen)),
-                                                Scene->AirEnvi, vec(1, 1, 1));
+      tracer RayTraceStructure(Tree, AirEnvi, Gen, Scene->RenderPar);
 
-      Im->SetPixel(x, y, image_vec(TraceResult.X, TraceResult.Y, TraceResult.Z));
-    }
-  }
+      for (INT x = 0; x < Im->FrameW; x++)
+      {
+        vec TraceResult = RayTraceStructure.Trace(Camera->ToRay(x + Distr(Gen), y + Distr(Gen)),
+                                                  Scene->AirEnvi, vec(1, 1, 1));
+
+        Im->SetPixel(x, y, image_vec(TraceResult.X, TraceResult.Y, TraceResult.Z));
+      }
+    });
 }
 
 /**

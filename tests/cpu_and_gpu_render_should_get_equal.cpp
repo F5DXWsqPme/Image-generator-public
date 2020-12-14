@@ -1,4 +1,5 @@
 #include <boost/test/unit_test.hpp>
+#include <cmath>
 
 #include "render/render.h"
 #include "scene/material.h"
@@ -92,9 +93,9 @@ DBL ImageDistance( const image &Im1, const image &Im2 )
  */
 BOOST_AUTO_TEST_CASE(CpuAndGpuGetEqual)
 {
-  const INT NumOfSamples = 30;
-  const INT W = 500;
-  const INT H = 300;
+  const INT NumOfSamples = 100;
+  const INT W = 200;
+  const INT H = 100;
 
   render RndCPU;
   render RndGPU;
