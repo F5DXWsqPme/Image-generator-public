@@ -136,7 +136,7 @@ VOID cpu_render::RenderFrame( image *Im, const cam &Camera, scene &Scene, INT Nu
     //  Img->ApplySample(SampleImg, i);
     *Im += SampleImg;
     std::cout << "Success. Elapsed time: " + std::to_string((clock() - Time) /
-                                                            (DBL)CLOCKS_PER_SEC) << "\n\n";
+                                                            (DBL)CLOCKS_PER_SEC) << "\n" << std::endl;
   }
 
   *Im /= SampleCounter;

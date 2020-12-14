@@ -7,7 +7,7 @@ project(${CURRENT_PROJECT_NAME})
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
 
-add_executable(${CURRENT_PROJECT_NAME}
+set(PROJECT_SOURCES
   src/ext/volk/volk.h
   src/ext/volk/volk.c
 
@@ -50,7 +50,7 @@ add_executable(${CURRENT_PROJECT_NAME}
   src/vulkan_wrappers/semaphore.cpp
   src/vulkan_wrappers/event.h
   src/vulkan_wrappers/event.cpp
-  
+
   src/math/matr.h
   src/math/vec.h
   src/math/ray.h
@@ -95,7 +95,12 @@ add_executable(${CURRENT_PROJECT_NAME}
   src/render/vulkan_render/vulkan_render.h
   src/render/vulkan_render/vulkan_render.cpp
 
-  src/main.cpp src/scene_loader/scene_loader.h src/scene_loader/scene_loader.cpp)
+  src/scene_loader/scene_loader.h
+  src/scene_loader/scene_loader.cpp)
+
+add_executable(${CURRENT_PROJECT_NAME}
+  ${PROJECT_SOURCES}
+  src/main.cpp)
 
 target_include_directories(${CURRENT_PROJECT_NAME} PRIVATE src)
 
@@ -153,7 +158,25 @@ ENDIF(DEFINED GLSL_COMPILER)
 
 find_package(Boost)
 
-IF (Boost_FOUND)
-  message(STATUS "Boost include directory: ${Boost_INCLUDE_DIRS}")
-  target_include_directories(${CURRENT_PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
-ENDIF(Boost_FOUND)
+target_include_directories(${CURRENT_PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
+
+message(STATUS "Boost include directory: ${Boost_INCLUDE_DIRS}")
+
+add_executable (Tests-run
+  ${PROJECT_SOURCES}
+  tests/tests_main.cpp
+  tests/cpu_and_gpu_render_should_get_equal.cpp
+  tests/cpu_and_gpu_render_with_scene_loader_test.cpp
+  tests/matrix_tests.cpp
+  tests/vec_tests.cpp)
+
+target_include_directories(Tests-run PRIVATE ${Boost_INCLUDE_DIRS})
+target_include_directories(Tests-run PRIVATE src)
+
+target_link_libraries(Tests-run PRIVATE volk_headers)
+
+IF (Vulkan_FOUND)
+  target_include_directories(Tests-run PRIVATE ${Vulkan_INCLUDE_DIRS})
+ELSE (Vulkan_FOUND)
+  message(FATAL_ERROR "Vulkan not found.")
+ENDIF (Vulkan_FOUND)

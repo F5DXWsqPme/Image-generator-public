@@ -103,7 +103,17 @@ matr matr::GetInverse( VOID ) const
  * \param[in] Row Row number
  * \return Pointer to row begin
  */
-FLT* matr::operator[]( const INT Row )
+FLT * matr::operator[]( const INT Row )
+{
+  return A[Row];
+}
+
+/**
+ * \brief Get pointer to row function (for Matrix[Row][Col] access)
+ * \param[in] Row Row number
+ * \return Pointer to row begin
+ */
+const FLT * matr::operator[]( const INT Row ) const
 {
   return A[Row];
 }

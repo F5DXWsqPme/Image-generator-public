@@ -89,6 +89,13 @@ public:
   FLT * operator[]( const INT Row );
 
   /**
+   * \brief Get pointer to row function (for Matrix[Row][Col] access)
+   * \param[in] Row Row number
+   * \return Pointer to row begin
+   */
+  const FLT * operator[]( const INT Row ) const;
+
+  /**
    * \brief Evaluate determinant function
    * \return Determinant
    */
