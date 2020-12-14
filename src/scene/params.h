@@ -1,6 +1,8 @@
 #ifndef __params_h_
 #define __params_h_
 
+#include <cstddef>
+
 #include "def.h"
 
 #pragma pack(push, 4)

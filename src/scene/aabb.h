@@ -1,6 +1,8 @@
 #ifndef __aabb_h_
 #define __aabb_h_
 
+#include <cstddef>
+
 #include "math/vec.h"
 #include "math/ray.h"
 
