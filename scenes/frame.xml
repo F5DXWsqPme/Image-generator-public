@@ -2,9 +2,9 @@
     <device_id>0</device_id>
     <width>1920</width>
     <height>1080</height>
-    <number_of_samples>100</number_of_samples>
+    <number_of_samples>30</number_of_samples>
     <output_path>res/frame.png</output_path>
-    <output_format>png</output_format>
+    <output_format>jpg</output_format>
     <render_mode>gpu</render_mode>
     <camera>
         <proj_dist>0.1</proj_dist>
