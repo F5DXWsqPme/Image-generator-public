@@ -20,6 +20,8 @@ VOID GenScene( scene &Scn );
  */
 DBL ImageDistance( const image &Im1, const image &Im2 );
 
+BOOST_AUTO_TEST_SUITE(CpuAndGpuGetEqualWithLoaderTestsSuite)
+
 /**
  * \brief Test cpu and gpu results equal with scene loader
  */
@@ -38,9 +40,9 @@ BOOST_AUTO_TEST_CASE(CpuAndGpuGetEqualWithLoader)
   RndGPU.MakeFrame(&ImgGPU, Loader.Camera, Loader.Scene,
                    Loader.Width, Loader.Height, Loader.NumberOfSamples);
 
-  INT NumOfSamples = 100;
-  INT W = 200;
-  INT H = 100;
+  INT NumOfSamples = 50;
+  INT W = 100;
+  INT H = 50;
 
   render RndCPU;
   scene Scn;
@@ -63,3 +65,5 @@ BOOST_AUTO_TEST_CASE(CpuAndGpuGetEqualWithLoader)
 
   BOOST_CHECK_SMALL(Dist, 0.3);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

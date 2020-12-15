@@ -88,14 +88,16 @@ DBL ImageDistance( const image &Im1, const image &Im2 )
   return Sum / Im1.FrameW / Im1.FrameH;
 }
 
+BOOST_AUTO_TEST_SUITE(CpuAndGpuGetEqualTestsSuite)
+
 /**
  * \brief Test cpu and gpu results equal
  */
 BOOST_AUTO_TEST_CASE(CpuAndGpuGetEqual)
 {
-  const INT NumOfSamples = 100;
-  const INT W = 200;
-  const INT H = 100;
+  const INT NumOfSamples = 50;
+  const INT W = 100;
+  const INT H = 50;
 
   render RndCPU;
   render RndGPU;
@@ -123,3 +125,5 @@ BOOST_AUTO_TEST_CASE(CpuAndGpuGetEqual)
 
   BOOST_CHECK_SMALL(Dist, 0.3);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

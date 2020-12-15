@@ -28,7 +28,7 @@ BOOL operator==( const matr &M1, const matr &M2 )
   return TRUE;
 }
 
-BOOST_AUTO_TEST_SUITE(MatrixTests)
+BOOST_AUTO_TEST_SUITE(MatrixTestsSuite)
 
 /**
  * \brief Test multiplication

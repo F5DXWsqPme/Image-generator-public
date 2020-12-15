@@ -25,6 +25,8 @@ BOOL operator==( const vec &V1, const vec &V2 )
   return TRUE;
 }
 
+BOOST_AUTO_TEST_SUITE(VectorTestsSuite)
+
 /**
  * \brief Test addition
  */
@@ -134,3 +136,5 @@ BOOST_AUTO_TEST_CASE(VecMinMaxTest)
   BOOST_CHECK_EQUAL(TRUE, vec::Min(V1, V2) == vec(0, 2, 3));
   BOOST_CHECK_EQUAL(TRUE, vec::Max(V1, V2) == vec(1, 2, 4));
 }
+
+BOOST_AUTO_TEST_SUITE_END()

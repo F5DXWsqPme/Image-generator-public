@@ -1,8 +1,8 @@
 <frame>
     <device_id>0</device_id>
-    <width>200</width>
-    <height>100</height>
-    <number_of_samples>100</number_of_samples>
+    <width>100</width>
+    <height>50</height>
+    <number_of_samples>50</number_of_samples>
     <output_path>res/frame.png</output_path>
     <output_format>png</output_format>
     <render_mode>gpu</render_mode>
