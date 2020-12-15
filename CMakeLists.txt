@@ -5,6 +5,9 @@ set(CURRENT_PROJECT_NAME ImageGenerator)
 project(${CURRENT_PROJECT_NAME})
 
 set(CMAKE_CXX_STANDARD 17)
+IF(UNIX)
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -pthread)
+ENDIF(UNIX)
 
 set(PROJECT_SOURCES
   src/ext/volk/volk.h
