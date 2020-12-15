@@ -63,20 +63,20 @@ BOOL aabb::Intersect( const ray& R, FLT *T ) const
   FLT Tn = (Min.X - R.Org.X) * R.InvDir.X;
   FLT Tf = (Max.X - R.Org.X) * R.InvDir.X;
 
-  FLT Near = std::min(Tn, Tf);
-  FLT Far = std::max(Tn, Tf);
+  FLT Near = fminf(Tn, Tf);
+  FLT Far = fmaxf(Tn, Tf);
 
   Tn = (Min.Y - R.Org.Y) * R.InvDir.Y;
   Tf = (Max.Y - R.Org.Y) * R.InvDir.Y;
 
-  Near = std::max(Near, std::min(Tn, Tf));
-  Far = std::min(Far, std::max(Tn, Tf));
+  Near = fmaxf(Near, fminf(Tn, Tf));
+  Far = fminf(Far, fmaxf(Tn, Tf));
 
   Tn = (Min.Z - R.Org.Z) * R.InvDir.Z;
   Tf = (Max.Z - R.Org.Z) * R.InvDir.Z;
 
-  Near = std::max(Near, std::min(Tn, Tf));
-  Far = std::min(Far, std::max(Tn, Tf));
+  Near = fmaxf(Near, fminf(Tn, Tf));
+  Far = fminf(Far, fmaxf(Tn, Tf));
   *T = Near;
   Far *= 1.00000024f;
 

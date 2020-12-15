@@ -1,5 +1,6 @@
 #include <cmath>
 #include <algorithm>
+#include <cfloat>
 
 #include "vec.h"
 
@@ -204,7 +205,12 @@ FLT vec::Length2( VOID ) const
  */
 FLT vec::Length( VOID ) const
 {
-  return sqrt(Length2());
+  FLT Len2 = Length2();
+
+  if (Len2 < FLT_MIN)
+    return 0;
+
+  return sqrt(Len2);
 }
 
 /**
@@ -242,7 +248,7 @@ vec & vec::Normalize( VOID )
  */
 vec vec::Min( const vec &V1, const vec &V2 )
 {
-  return vec(std::min(V1.X, V2.X), std::min(V1.Y, V2.Y), std::min(V1.Z, V2.Z));
+  return vec(fminf(V1.X, V2.X), fminf(V1.Y, V2.Y), fminf(V1.Z, V2.Z));
 }
 
 /**
@@ -253,7 +259,7 @@ vec vec::Min( const vec &V1, const vec &V2 )
  */
 vec vec::Max( const vec &V1, const vec &V2 )
 {
-  return vec(std::max(V1.X, V2.X), std::max(V1.Y, V2.Y), std::max(V1.Z, V2.Z));
+  return vec(fmaxf(V1.X, V2.X), fmaxf(V1.Y, V2.Y), fmaxf(V1.Z, V2.Z));
 }
 
 /**
@@ -428,7 +434,12 @@ FLT vec2::Length2( VOID ) const
  */
 FLT vec2::Length( VOID ) const
 {
-  return sqrt(Length2());
+  FLT Len2 = Length2();
+
+  if (Len2 < FLT_MIN)
+    return 0;
+  
+  return sqrt(Len2);
 }
 
 /**
@@ -488,9 +499,9 @@ VOID image_vec::SetValue(const DBL NewR, const DBL NewG, const DBL NewB)
 DWORD image_vec::ToDWORD(VOID) const
 {
   const DWORD
-    CorrectedR = std::min(std::max(R * 255.0, 0.0), 255.0),
-    CorrectedG = std::min(std::max(G * 255.0, 0.0), 255.0),
-    CorrectedB = std::min(std::max(B * 255.0, 0.0), 255.0);
+    CorrectedR = fminf(fmaxf(R * 255.0, 0.0), 255.0),
+    CorrectedG = fminf(fmaxf(G * 255.0, 0.0), 255.0),
+    CorrectedB = fminf(fmaxf(B * 255.0, 0.0), 255.0);
 
   return 0xFF000000 | (CorrectedB << 16) |
          (CorrectedG << 8) | CorrectedR;

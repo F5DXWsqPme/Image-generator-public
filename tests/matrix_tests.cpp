@@ -28,6 +28,8 @@ BOOL operator==( const matr &M1, const matr &M2 )
   return TRUE;
 }
 
+BOOST_AUTO_TEST_SUITE(MatrixTests)
+
 /**
  * \brief Test multiplication
  */
@@ -93,3 +95,6 @@ BOOST_AUTO_TEST_CASE(MatrixTransposeTest)
 
   BOOST_CHECK_EQUAL(TRUE, M.GetTranspose() == Res);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+

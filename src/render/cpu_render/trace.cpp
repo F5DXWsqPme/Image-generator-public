@@ -2,6 +2,7 @@
 #include <random>
 #include <ctime>
 #include <algorithm>
+#include <cfloat>
 
 #include "math/matr.h"
 #include "trace.h"
@@ -76,11 +77,23 @@ vec tracer::GetMicroNormal( const FLT Alpha2, const vec &MacroNormal )
   const FLT Phi = DistrPhi(Gen);
   const FLT Std = DistrStd(Gen);
 
-  const FLT CosThetha2 = std::min((1.f - Std) / (1.f + Alpha2 * Std - Std), 1.f);
-  const FLT CosThetha = sqrt(CosThetha2);
-  const FLT SinThetha = sqrt(1.f - CosThetha2);
+  const FLT CosTheta2 = fminf((1.f - Std) / (1.f + Alpha2 * Std - Std), 1.f);
+  FLT CosTheta;
 
-  const vec N = vec(SinThetha * cos(Phi), CosThetha, SinThetha * sin(Phi));
+  if (CosTheta2 < FLT_MIN)
+    CosTheta = 0;
+  else
+    CosTheta = sqrt(CosTheta2);
+
+  FLT SinThetaArg = 1 - CosTheta2;
+  FLT SinThetha;
+
+  if (SinThetaArg < FLT_MIN)
+    SinThetha = 0;
+  else
+    SinThetha = sqrt(SinThetaArg);
+
+  const vec N = vec(SinThetha * cos(Phi), CosTheta, SinThetha * sin(Phi));
   
   const vec Up1(abs(MacroNormal.Y) < 0.9f ? vec(0, 1, 0) : vec(1, 0, 0));
   const vec Tan(Up1 % MacroNormal);
@@ -106,7 +119,22 @@ vec tracer::GetDiffDir( const vec& Normal )
 
   const FLT Y = DistrH(Gen);
   const FLT Phi = DistrPhi(Gen);
-  const FLT R = sqrt(1 - pow(Y, 2));
+  FLT PowY2;
+
+  if (fabs(Y) < FLT_MIN)
+    PowY2 = 0;
+  else if (Y < -FLT_MIN)
+    PowY2 = -powf(-Y, 2);
+  else
+    PowY2 = powf(Y, 2);
+
+  FLT RArg = 1 - PowY2;
+  FLT R;
+
+  if (RArg < FLT_MIN)
+    R = 0;
+  else
+    R = sqrt(RArg);
 
   const vec Res = vec(R * sin(Phi), Y, R * cos(Phi));
 
@@ -123,9 +151,17 @@ vec tracer::GetDiffDir( const vec& Normal )
   */
 FLT tracer::GeometryEval( const FLT CosThetaN, const FLT Alpha2 ) 
 {
-  const FLT CosTheta2 = std::min(CosThetaN * CosThetaN, 1.f);
+  const FLT CosTheta2 = fminf(CosThetaN * CosThetaN, 1.f);
   const FLT Tan2 = (1 - CosTheta2) / CosTheta2;
-  const FLT GP = 2 / (1 + sqrt(1 + Alpha2 * Tan2));
+  FLT SqrtArg = 1 + Alpha2 * Tan2;
+  FLT SqrtRes;
+
+  if (SqrtArg < FLT_MIN)
+    SqrtRes = 0;
+  else
+    SqrtRes = sqrt(SqrtArg);
+
+  const FLT GP = 2 / (1 + SqrtRes);
 
   return GP;
 }
@@ -138,7 +174,15 @@ FLT tracer::GeometryEval( const FLT CosThetaN, const FLT Alpha2 )
   */
 vec tracer::FresnelSchlick( const vec &F0, const FLT CosTheta )
 {
-  return F0 + (vec(1, 1, 1) - F0) * pow(1 - std::min(std::max(CosTheta, 0.f), 1.f), 5);
+  FLT PowArg = 1 - fminf(fmaxf(CosTheta, 0.f), 1.f);
+  FLT PowRes;
+
+  if (PowArg < FLT_MIN)
+    PowRes = 0;
+  else
+    PowRes = powf(PowArg, 5);
+
+  return F0 + (vec(1, 1, 1) - F0) * PowRes;
 }
 
 /**
@@ -174,7 +218,12 @@ vec tracer::Shade( const vec &Dir, const INTR &Intr, const environment &Envi, co
   }
   
   const material &Mtl = material::Table[Intr.Tr->GetMaterialId()];
-  const FLT Alpha2 = powf(Mtl.Roughness, 4);
+  FLT Alpha2;
+
+  if (Mtl.Roughness < FLT_MIN)
+    Alpha2 = 0;
+  else
+    Alpha2 = powf(Mtl.Roughness, 4);
   
   const vec MicroN = GetMicroNormal(Alpha2, Normal);
   const vec Refl = Dir - MicroN * (2 * (MicroN & Dir));

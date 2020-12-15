@@ -50,10 +50,10 @@ const image_vec & image::GetPixelSave( const INT X, const INT Y ) const
     CorrectX = X,
     CorrectY = Y;
 
-  CorrectX = std::max(CorrectX, 0);
-  CorrectX = std::min(CorrectX, FrameW - 1);
-  CorrectY = std::max(CorrectY, 0);
-  CorrectY = std::min(CorrectY, FrameH - 1);
+  CorrectX = fmaxf(CorrectX, 0);
+  CorrectX = fminf(CorrectX, FrameW - 1);
+  CorrectY = fmaxf(CorrectY, 0);
+  CorrectY = fminf(CorrectY, FrameH - 1);
 
   return Buffer[CorrectX + (UINT64)CorrectY * W];
 }
