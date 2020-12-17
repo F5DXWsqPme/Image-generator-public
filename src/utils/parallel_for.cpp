@@ -1,5 +1,6 @@
 #include <future>
 #include <thread>
+#include <vector>
 
 #include "parallel_for.h"
 
