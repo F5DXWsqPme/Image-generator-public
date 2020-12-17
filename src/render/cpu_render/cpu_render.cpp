@@ -1,4 +1,3 @@
-#include <omp.h>
 #include <ctime>
 #include <random>
 #include <iostream>
