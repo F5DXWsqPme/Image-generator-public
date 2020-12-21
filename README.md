@@ -12,7 +12,7 @@ Simple image generator
 - mkdir build
 - cd build
 - cmake ..
-- cmake --build .
+- cmake --build . (macOS: brew install gmake; gmake)
 
 ### How run ###
 Run with parameter-name of scene file (xml file; description of tags [here](InputFormat.md))
