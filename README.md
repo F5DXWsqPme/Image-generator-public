@@ -1,6 +1,9 @@
 # Image-generator  ![workflow-badge](https://github.com/F5DXWsqPme/CubeGame-public/actions/workflows/cmake.yml/badge.svg) #  
 Simple image generator
 
+![image](/images/frame_one_seed_5000.png "5000 samples per pixel")
+*5000 samples per pixel*
+
 ### How install ###
 - Install Vulkan (https://vulkan.lunarg.com/)
 - Install Boost (https://www.boost.org/)
