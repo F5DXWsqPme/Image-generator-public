@@ -1,4 +1,4 @@
-# Image-generator #  ![workflow-badge](https://github.com/F5DXWsqPme/CubeGame-public/actions/workflows/cmake.yml/badge.svg)
+# Image-generator  ![workflow-badge](https://github.com/F5DXWsqPme/CubeGame-public/actions/workflows/cmake.yml/badge.svg) #  
 Simple image generator
 
 ### How install ###
