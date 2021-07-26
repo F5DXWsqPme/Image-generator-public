@@ -94,8 +94,8 @@ VOID vulkan_render::CreatePipelineLayout( VOID )
 }
 
 /**
-   * \brief Create render pipeline
-   */
+ * \brief Create render pipeline
+ */
 VOID vulkan_render::CreateRenderPipeline( VOID )
 {
   pipeline_cache EmptyCache(VkApp.GetDeviceId());
