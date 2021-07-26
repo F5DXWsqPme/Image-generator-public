@@ -19,3 +19,16 @@ Simple image generator
 
 ### How run ###
 Run with parameter-name of scene file (xml file; description of tags [here](InputFormat.md))
+
+### Features ###
+- Lighting
+	- Rough surfaces
+	- Metall materials
+	- Dielectric materials
+	- Volumetric light sources
+- HDR rendering
+- Bloom
+- Tone mapping
+- Absorption
+- Fog
+- XML scene description
